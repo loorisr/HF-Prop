@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HF Prop — ITU-R P.533 propagation in your browser</title>
+<meta name="description" content="HF propagation predictions (ITU-R P.533-14) computed entirely in the browser: point-to-point by band, coverage maps and best frequency.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="css/app.css">
+<script src="vendor/leaflet/leaflet.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <h1>HF Prop <span class="sub">ITU-R P.533-14</span></h1>
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-path" aria-selected="true">Path</button>
+    <button role="tab" id="tab-map" aria-selected="false">Coverage map</button>
+  </nav>
+</header>
+
+<main class="layout">
+  <section class="map-wrap">
+    <div id="map"></div>
+    <div class="map-hud">
+      <div id="hud-text">Tap the map to set the receiver.</div>
+      <div id="progress" class="progress" hidden><div></div></div>
+    </div>
+    <div id="legend" class="legend" hidden></div>
+  </section>
+
+  <aside class="panel">
+    <!-- Stations -->
+    <fieldset class="card">
+      <legend>Stations</legend>
+      <div class="row">
+        <label for="tx-pos">My station (TX)</label>
+        <div class="inline">
+          <input id="tx-pos" placeholder="JN18du or 48.85, 2.35" autocomplete="off" spellcheck="false">
+          <button id="tx-gps" class="small" title="Use my location">Locate</button>
+        </div>
+      </div>
+      <div class="row path-only">
+        <label for="rx-pos">Receiver (RX)</label>
+        <input id="rx-pos" placeholder="FN31 or 40.7, -74.0" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="row path-only seg" role="radiogroup" aria-label="Map tap sets">
+        <span class="seg-label">Tap on map sets</span>
+        <label><input type="radio" name="tapset" value="rx" checked> RX</label>
+        <label><input type="radio" name="tapset" value="tx"> TX</label>
+      </div>
+    </fieldset>
+
+
+
+
+
+    <!-- Map settings -->
+    <fieldset class="card map-only">
+      <legend>Map</legend>
+      <div class="grid2">
+        <div class="row">
+          <label for="map-kind">Show</label>
+          <select id="map-kind">
+            <option value="fot">Best frequency (FOT)</option>
+            <option value="muf">MUF</option>
+            <option value="rel">Reliability on band</option>
+            <option value="snr">SNR on band</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="map-band">Band</label>
+          <select id="map-band"></select>
+        </div>
+      </div>
+      <label class="check"><input id="map-fine" type="checkbox" checked> Refine to 1.5° (slower)</label>
+    </fieldset>
+    <!-- Time -->
+    <fieldset class="card">
+      <legend>Time &amp; sun</legend>
+      <div class="grid2">
+        <div class="row">
+          <label for="month">Month</label>
+          <input id="month" type="month">
+        </div>
+        <div class="row">
+          <label for="ssn">Sunspot number (SSN)</label>
+          <div class="inline">
+            <input id="ssn" type="number" min="1" max="300" step="1">
+            <label class="check" title="Smoothed SSN from NOAA SWPC"><input id="ssn-auto" type="checkbox" checked> Auto</label>
+          </div>
+        </div>
+      </div>
+      <div id="ssn-src" class="hint"></div>
+      <div class="row">
+        <label for="hour">UTC hour: <output id="hour-out"></output></label>
+        <div class="inline">
+          <input id="hour" type="range" min="0" max="23" step="1">
+          <button id="hour-now" class="small">Now</button>
+        </div>
+      </div>
+    </fieldset>
+    <!-- Results -->
+    <section id="results-path" class="card results path-only">
+      <h2>Path</h2>
+      <div id="path-summary" class="summary">Set both stations to see the prediction.</div>
+      <div id="band-table"></div>
+      <h3>Reliability by band and hour (UTC)</h3>
+      <div id="heatmap" class="chart-wrap"></div>
+      <div class="ramp-legend"><span>0%</span><i id="heat-ramp"></i><span>100%</span></div>
+      <h3>MUF and best frequency over 24 h (MHz)</h3>
+      <div class="legend-inline"><span class="key s1"></span>MUF (median) <span class="key s2"></span>FOT (90 % of days)</div>
+      <div id="mufchart" class="chart-wrap"></div>
+    </section>
+    <!-- Station settings -->
+    <fieldset class="card">
+      <legend>Station</legend>
+      <div class="grid2">
+        <div class="row">
+          <label for="power">Power (W)</label>
+          <input id="power" type="number" min="1" max="10000" step="1" list="power-list">
+          <datalist id="power-list"><option value="5"><option value="10"><option value="50"><option value="100"><option value="400"><option value="1000"></datalist>
+        </div>
+        <div class="row">
+          <label for="mode">Mode</label>
+          <select id="mode"></select>
+        </div>
+        <div class="row">
+          <label for="ant-tx">TX antenna</label>
+          <select id="ant-tx" class="ant"></select>
+        </div>
+        <div class="row">
+          <label for="h-tx">Height (m)</label>
+          <input id="h-tx" type="number" min="1" max="100" step="1">
+        </div>
+        <div class="row">
+          <label for="ant-rx">RX antenna</label>
+          <select id="ant-rx" class="ant"></select>
+        </div>
+        <div class="row">
+          <label for="h-rx">Height (m)</label>
+          <input id="h-rx" type="number" min="1" max="100" step="1">
+        </div>
+        <div class="row">
+          <label for="noise">RX noise</label>
+          <select id="noise">
+            <option value="0">City</option>
+            <option value="1">Residential</option>
+            <option value="2">Rural</option>
+            <option value="3">Quiet rural</option>
+          </select>
+        </div>
+      </div>
+      <div class="hint">Antennas always point at the other station. Yagi and dipole patterns are modeled over average ground.</div>
+    </fieldset>
+    <section class="card about">
+      <h2>About</h2>
+      <p>Monthly-median predictions with the ITU-R P.533-14 method (ITU-R Study Group 3 reference code, ITURHFProp v14.3), compiled to WebAssembly and run in your browser — no server. Real conditions vary from day to day (storms, sporadic-E, aurora): treat this as a statistical forecast.</p>
+      <p class="hint">Engine &amp; data: ITU-R SG3 (Behm, Engelbrecht, Watson). WASM port inspired by OpenHamClock. Solar data: NOAA SWPC. Map: © OpenStreetMap contributors, © CARTO.</p>
+    </section>
+  </aside>
+</main>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

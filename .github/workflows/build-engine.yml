@@ -1,0 +1,17 @@
+name: Rebuild WASM engine (manual)
+
+# The compiled engine (web/engine/p533.wasm) is committed, so the site needs
+# no build step. Run this after changing engine/ to rebuild and download it.
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y clang lld wasi-libc libclang-rt-18-dev-wasm32
+      - run: engine/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p533-wasm
+          path: web/engine/p533.wasm

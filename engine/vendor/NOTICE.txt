@@ -1,0 +1,20 @@
+Source files in this directory are from ITU-R-HF v14.3
+https://github.com/ITU-R-Study-Group-3/ITU-R-HF
+
+  The ITURHFProp, P533 and P372 software has been developed collaboratively by
+  participants in ITU-R Study Group 3. It may be used by implementers in their
+  implementation of the Recommendation as well as in revisions of the specific
+  original Recommendation and in other ITU Recommendations, free from any
+  copyright assertions.
+
+  This software is provided "as is" WITH NO WARRANTIES, EXPRESS OR IMPLIED,
+  INCLUDING BUT NOT LIMITED TO, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NON-INFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS.
+
+  The ITU shall not be held liable in any event for any damages whatsoever
+  (including, without limitation, damages for loss of profits, business
+  interruption, loss of information, or any other pecuniary loss) arising out of
+  or related to use of the software.
+
+Only change for this project: common.h is a copy of Common.h (case-sensitive
+include in Noise.c). The static-link shim is engine/ohp_shim.h.
