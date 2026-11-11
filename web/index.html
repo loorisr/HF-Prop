@@ -72,6 +72,13 @@
           <label for="map-band">Band</label>
           <select id="map-band"></select>
         </div>
+        <div class="row">
+          <label for="map-style">Colors</label>
+          <select id="map-style">
+            <option value="bands">By band / steps</option>
+            <option value="gradient">Gradient</option>
+          </select>
+        </div>
       </div>
       <label class="check"><input id="map-fine" type="checkbox" checked> Refine to 1.5° (slower)</label>
     </fieldset>
@@ -142,6 +149,14 @@
           <input id="h-rx" type="number" min="1" max="100" step="1">
         </div>
         <div class="row">
+          <label for="aim-tx" title="Main lobe (Yagi) or broadside (dipole), degrees true. Empty: always aimed at the other station.">TX heading (°)</label>
+          <input id="aim-tx" type="number" min="0" max="359" step="1" placeholder="Auto">
+        </div>
+        <div class="row">
+          <label for="aim-rx" title="Main lobe (Yagi) or broadside (dipole), degrees true. Empty: always aimed at the other station.">RX heading (°)</label>
+          <input id="aim-rx" type="number" min="0" max="359" step="1" placeholder="Auto">
+        </div>
+        <div class="row">
           <label for="noise">RX noise</label>
           <select id="noise">
             <option value="0">City</option>
@@ -151,7 +166,7 @@
           </select>
         </div>
       </div>
-      <div class="hint">Antennas always point at the other station. Yagi and dipole patterns are modeled over average ground.</div>
+      <div class="hint">Heading empty (Auto): the antenna always points at the other station, which on the coverage map means a beam turned toward every point. Set a heading to see the real pattern. Patterns are modeled over average ground; other antennas reuse the nearest model (vertical, dipole or Yagi) with a typical gain or loss.</div>
     </fieldset>
     <section class="card about">
       <h2>About</h2>

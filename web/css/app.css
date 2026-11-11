@@ -123,6 +123,12 @@ body.mode-path .map-only { display: none; }
 .legend .ticks span.start { transform: none; }
 .legend .ticks span.end { transform: translateX(-100%); }
 .legend .title { font-weight: 600; }
+.legend .swatches { list-style: none; margin: 6px 0 2px; padding: 0; display: grid; gap: 3px 10px; }
+.legend .swatches.cols2 { grid-template-columns: 1fr 1fr; }
+.legend:has(.cols2) { width: 270px; }
+.legend .swatches li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.legend .swatches i { flex: 0 0 14px; height: 12px; border-radius: 3px; box-shadow: inset 0 0 0 1px #0003; }
+.legend .swatches .sub { color: var(--text-muted); font-size: 10px; margin-left: auto; }
 
 /* Results */
 .summary { font-size: 13px; color: var(--text-secondary); }
