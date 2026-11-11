@@ -4,12 +4,20 @@ name: Rebuild WASM engine (manual)
 # no build step. Run this after changing engine/ to rebuild and download it.
 on: workflow_dispatch
 
+env:
+  # Pinned toolchain for reproducible builds: https://github.com/WebAssembly/wasi-sdk/releases
+  WASI_SDK_VERSION: "34"
+
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - run: sudo apt-get update && sudo apt-get install -y clang lld wasi-libc libclang-rt-18-dev-wasm32
+      - name: Install wasi-sdk
+        run: |
+          v="$WASI_SDK_VERSION"
+          curl -fsSL "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-$v/wasi-sdk-$v.0-x86_64-linux.tar.gz" | tar xz -C "$RUNNER_TEMP"
+          echo "WASI_SDK=$RUNNER_TEMP/wasi-sdk-$v.0-x86_64-linux" >> "$GITHUB_ENV"
       - run: engine/build.sh
       - uses: actions/upload-artifact@v7
         with:

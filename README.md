@@ -68,11 +68,17 @@ coefficients, parses a text config and writes a text report. Here:
 
 ## Rebuild the engine (optional)
 
+With [wasi-sdk](https://github.com/WebAssembly/wasi-sdk/releases) (same toolchain as CI, version pinned in
+`.github/workflows/build-engine.yml`):
+
 ```bash
-sudo apt install clang lld wasi-libc libclang-rt-18-dev-wasm32
-engine/build.sh          # → web/engine/p533.wasm
-node tests/smoke.mjs     # quick check
+curl -fsSL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-34/wasi-sdk-34.0-x86_64-linux.tar.gz | tar xz -C /opt
+WASI_SDK=/opt/wasi-sdk-34.0-x86_64-linux engine/build.sh   # → web/engine/p533.wasm
+node tests/smoke.mjs                                       # quick check
 ```
+
+Or with distro clang (older `wasm32-wasi` sysroot layout):
+`sudo apt install clang lld wasi-libc libclang-rt-18-dev-wasm32 && TARGET=wasm32-wasi engine/build.sh`.
 
 Data (if you want to regenerate it): clone
 https://github.com/ITU-R-Study-Group-3/ITU-R-HF (tag v14.3) and run
