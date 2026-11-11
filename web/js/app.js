@@ -93,12 +93,13 @@ const map = L.map('map', { worldCopyJump: true, minZoom: 1, zoomControl: true, a
 let tiles = null;
 function setTiles() {
   tiles?.remove();
-  const style = dark.matches ? 'dark_all' : 'light_all';
-  tiles = L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`, {
-    subdomains: 'abcd', maxZoom: 10,
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
+  // OpenStreetMap standard tiles (no API key). Dark mode is done with a CSS filter (see app.css).
+  tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 10,
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
   tiles.bringToBack();
+  map.getContainer().classList.toggle('map-dark', dark.matches);
 }
 setTiles();
 dark.addEventListener('change', () => { setTiles(); renderPath(); renderMapFromCache(); });

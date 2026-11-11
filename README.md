@@ -86,4 +86,4 @@ https://github.com/ITU-R-Study-Group-3/ITU-R-HF (tag v14.3) and run
   `engine/vendor/` (unmodified, apart from the static build via `engine/ohp_shim.h`).
 - Idea of the WASM port: [OpenHamClock](https://github.com/accius/openhamclock) (MIT).
 - [Leaflet](https://leafletjs.com) (BSD-2), [browser_wasi_shim](https://github.com/bjorn3/browser_wasi_shim) (MIT/Apache-2.0).
-- Basemap © OpenStreetMap contributors, © CARTO. Solar data: NOAA SWPC.
+- Basemap © OpenStreetMap contributors. Solar data: NOAA SWPC.
