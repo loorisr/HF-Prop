@@ -9,7 +9,7 @@ ITURHFProp v14.3) compiled to WebAssembly.
   over the mode's required SNR, a 24 h × band heatmap, and the MUF / FOT curve.
 - **Coverage map** tab: world maps from your station of the **best frequency (FOT)**,
   the **MUF**, or the **reliability / SNR on one band**. Progressive rendering:
-  a 12° grid appears almost instantly, then it is refined to 6°, 3° and 1.5°.
+  a 12° grid appears almost instantly, then it is refined to 6°, 3° and 1.5° (the final resolution, from 12° to 0.75°, is selectable).
 - Settings: month, UTC hour, sunspot number (automatic from NOAA SWPC, or manual),
   power, mode (SSB, CW, FT8, FT4, WSPR, AM), TX/RX antenna (isotropic, ¼λ vertical,
   ½λ dipole, 3-element Yagi + height), receiver noise environment.

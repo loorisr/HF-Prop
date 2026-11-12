@@ -67,8 +67,10 @@ const defaults = {
   power: 100, mode: 'SSB',
   antTx: 'dipole', hTx: 10, antRx: 'dipole', hRx: 10, noise: 1,
   aimTx: -1, aimRx: -1, // antenna heading in degrees true; -1 = always aimed at the other station
-  mapKind: 'fot', mapBand: '20m', mapStyle: 'bands', fine: true,
+  mapKind: 'fot', mapBand: '20m', mapStyle: 'bands', res: 1.5,
 };
+// Selectable map grid steps (degrees). Each must divide 2*LAT_MAX and 360.
+const MAP_RES = [12, 6, 3, 1.5, 0.75];
 const state = loadState();
 
 function loadState() {
@@ -80,7 +82,7 @@ function loadState() {
     if (pos('tx')) s.tx = pos('tx');
     if (pos('rx')) s.rx = pos('rx');
     for (const k of ['ym', 'mode', 'antTx', 'antRx', 'mapKind', 'mapBand', 'mapStyle', 'view']) if (h.get(k)) s[k] = h.get(k);
-    for (const k of ['hour', 'ssn', 'power', 'hTx', 'hRx', 'noise', 'aimTx', 'aimRx']) if (h.get(k) && Number.isFinite(+h.get(k))) s[k] = +h.get(k);
+    for (const k of ['res', 'hour', 'ssn', 'power', 'hTx', 'hRx', 'noise', 'aimTx', 'aimRx']) if (h.get(k) && Number.isFinite(+h.get(k))) s[k] = +h.get(k);
     if (h.get('ssn')) s.ssnAuto = false;
   } catch { /* */ }
   return normalize(s);
@@ -114,7 +116,10 @@ function normalize(s) {
     s[k] = Number.isFinite(v) && v >= 0 ? ((Math.round(v) % 360) + 360) % 360 : -1;
   }
   s.ssnAuto = s.ssnAuto !== false;
-  s.fine = s.fine !== false;
+  if (s.fine === false && s.res === undefined) s.res = 3; // migrate old checkbox
+  delete s.fine;
+  s.res = Number(s.res);
+  pick('res', (v) => MAP_RES.includes(v));
   return s;
 }
 function saveState() {
@@ -124,6 +129,7 @@ function saveState() {
     rx: state.rx ? state.rx.map((v) => v.toFixed(3)).join(',') : '', ym: state.ym, hour: state.hour,
     mode: state.mode, power: state.power, antTx: state.antTx, hTx: state.hTx, antRx: state.antRx, hRx: state.hRx,
     aimTx: state.aimTx, aimRx: state.aimRx, noise: state.noise, mapKind: state.mapKind, mapBand: state.mapBand, mapStyle: state.mapStyle,
+    res: state.res,
   });
   if (!state.ssnAuto) h.set('ssn', state.ssn);
   history.replaceState(null, '', '#' + h.toString());
@@ -276,7 +282,7 @@ function syncInputs() {
   $('map-style').value = state.mapStyle;
   // Band only matters for reliability/SNR; MUF and FOT don't depend on the operating frequency.
   $('map-band').closest('.row').style.display = ['rel', 'snr'].includes(state.mapKind) ? '' : 'none';
-  $('map-fine').checked = state.fine;
+  $('map-res').value = String(state.res);
   $('tab-path').setAttribute('aria-selected', state.view === 'path');
   $('tab-map').setAttribute('aria-selected', state.view === 'map');
   document.body.className = 'mode-' + state.view;
@@ -324,7 +330,7 @@ on('noise', 'change', () => { state.noise = +$('noise').value; afterChange(['pat
 on('map-kind', 'change', () => { state.mapKind = $('map-kind').value; afterChange(['map']); });
 on('map-band', 'change', () => { state.mapBand = $('map-band').value; afterChange(['map']); });
 on('map-style', 'change', () => { state.mapStyle = $('map-style').value; syncInputs(); saveState(); renderMapFromCache(); });
-on('map-fine', 'change', () => { state.fine = $('map-fine').checked; afterChange(['map']); });
+on('map-res', 'change', () => { state.res = +$('map-res').value; afterChange(['map']); });
 on('tab-path', 'click', () => setView('path'));
 on('tab-map', 'click', () => setView('map'));
 
@@ -491,7 +497,7 @@ function renderPath() {
 }
 const fmt1 = (v) => (Number.isFinite(v) ? v.toFixed(1) : '—');
 
-/* ---- coverage map: progressive 12° → 6° → 3° → 1.5° ---- */
+/* ---- coverage map: progressive 12° → 6° → … → chosen resolution ---- */
 let mapGen = 0;
 // Computed points per configuration, most recently used last: going back to an
 // hour or a band already seen is instant.
@@ -520,7 +526,8 @@ async function computeMap() {
   const freq = mapFreq();
   const key = JSON.stringify([cfg, state.tx, state.hour, freq]);
   const cache = gridCacheFor(key);
-  const levels = state.fine ? [12, 6, 3, 1.5] : [12, 6, 3];
+  // Coarse-to-fine up to the chosen resolution; each level reuses the coarser points.
+  const levels = MAP_RES.filter((r) => r >= state.res);
   const t0 = performance.now();
   let done = 0;
   const total = levels.reduce((s, st) => s + makeGrid(st).nLat * makeGrid(st).nLon, 0);

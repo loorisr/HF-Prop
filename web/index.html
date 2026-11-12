@@ -80,7 +80,16 @@
           </select>
         </div>
       </div>
-      <label class="check"><input id="map-fine" type="checkbox" checked> Refine to 1.5° (slower)</label>
+      <div class="row">
+        <label for="map-res">Resolution</label>
+        <select id="map-res" title="Final grid step; the map is refined progressively from 12°">
+          <option value="12">12° (instant)</option>
+          <option value="6">6°</option>
+          <option value="3">3° (fast)</option>
+          <option value="1.5">1.5° (default)</option>
+          <option value="0.75">0.75° (slow, ~4× 1.5°)</option>
+        </select>
+      </div>
     </fieldset>
     <!-- Time -->
     <fieldset class="card">
